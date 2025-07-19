@@ -10,7 +10,7 @@ on:
 jobs:
   deploy-dev:
     if: startsWith(github.ref, 'refs/heads/features/')
-    uses: your-org/devops-pipelines/.github/workflows/build-and-deploy.yml@main
+    uses: aruncena/devops-pipeline/.github/workflows/build-and-deploy.yml@main
     with:
       environment: dev
       app_name: my-app
