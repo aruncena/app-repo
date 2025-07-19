@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         env: [test, stage]
-    uses: your-org/devops-pipelines/.github/workflows/build-and-deploy.yml@main
+    uses: aruncena/devops-pipeline/.github/workflows/build-and-deploy.yml@main
     with:
       environment: ${{ matrix.env }}
       app_name: my-app
@@ -35,7 +35,7 @@ jobs:
 
   deploy-prod:
     if: github.ref == 'refs/heads/release'
-    uses: your-org/devops-pipelines/.github/workflows/build-and-deploy.yml@main
+    uses: aruncena/devops-pipeline/.github/workflows/build-and-deploy.yml@main
     with:
       environment: prod
       app_name: my-app
