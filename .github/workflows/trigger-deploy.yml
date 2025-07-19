@@ -10,7 +10,7 @@ on:
 jobs:
   deploy-dev:
     if: startsWith(github.ref, 'refs/heads/features/')
-    uses: aruncena/devops-pipeline/.github/workflows/build-and-deploy.yml@main
+    uses: aruncena/devops-pipeline/.github/workflows/build-and-deploy.yml@master
     with:
       environment: dev
       app_name: my-app
@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         env: [test, stage]
-    uses: aruncena/devops-pipeline/.github/workflows/build-and-deploy.yml@main
+    uses: aruncena/devops-pipeline/.github/workflows/build-and-deploy.yml@master
     with:
       environment: ${{ matrix.env }}
       app_name: my-app
@@ -35,7 +35,7 @@ jobs:
 
   deploy-prod:
     if: github.ref == 'refs/heads/release'
-    uses: aruncena/devops-pipeline/.github/workflows/build-and-deploy.yml@main
+    uses: aruncena/devops-pipeline/.github/workflows/build-and-deploy.yml@master
     with:
       environment: prod
       app_name: my-app
