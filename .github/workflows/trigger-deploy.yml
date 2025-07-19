@@ -29,7 +29,7 @@ jobs:
       environment: ${{ matrix.env }}
       app_name: my-app
     secrets:
-      EC2_HOST: ${{ secrets[format('{0}_HOST', matrix.env | upper)] }}
+      EC2_HOST: ${{ secrets[matrix.env == 'test' && 'TEST_HOST' || 'STAGE_HOST'] }}
       EC2_USER: ${{ secrets.EC2_USER }}
       EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
 
