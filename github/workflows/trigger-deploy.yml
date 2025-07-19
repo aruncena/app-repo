@@ -1,0 +1,45 @@
+name: Trigger Central Pipeline
+
+on:
+  push:
+    branches:
+      - 'features/**'
+      - develop
+      - release
+
+jobs:
+  deploy-dev:
+    if: startsWith(github.ref, 'refs/heads/features/')
+    uses: your-org/devops-pipelines/.github/workflows/build-and-deploy.yml@main
+    with:
+      environment: dev
+      app_name: my-app
+    secrets:
+      EC2_HOST: ${{ secrets.DEV_HOST }}
+      EC2_USER: ${{ secrets.EC2_USER }}
+      EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+
+  deploy-test-stage:
+    if: github.ref == 'refs/heads/develop'
+    strategy:
+      matrix:
+        env: [test, stage]
+    uses: your-org/devops-pipelines/.github/workflows/build-and-deploy.yml@main
+    with:
+      environment: ${{ matrix.env }}
+      app_name: my-app
+    secrets:
+      EC2_HOST: ${{ secrets[format('{0}_HOST', matrix.env | upper)] }}
+      EC2_USER: ${{ secrets.EC2_USER }}
+      EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+
+  deploy-prod:
+    if: github.ref == 'refs/heads/release'
+    uses: your-org/devops-pipelines/.github/workflows/build-and-deploy.yml@main
+    with:
+      environment: prod
+      app_name: my-app
+    secrets:
+      EC2_HOST: ${{ secrets.PROD_HOST }}
+      EC2_USER: ${{ secrets.EC2_USER }}
+      EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
