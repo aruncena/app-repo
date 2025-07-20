@@ -1,7 +1,7 @@
 This project contains a barebones example webapp that uses Maven to package a web app.
 
 This project is laid out like this:
-
+sample commit
 - `hello-world-maven/`
   - **`pom.xml`** is a Maven [POM file](https://maven.apache.org/pom.html) that defines the project.
   - `src/main/` is a directory that contains the code.
