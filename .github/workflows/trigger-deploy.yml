@@ -1,45 +1,202 @@
-name: Trigger Central Pipeline
+name: Maven Build and Tomcat Deployment
 
 on:
   push:
     branches:
-      - 'features/**'
-      - develop
-      - release
+      - 'feature/**'
+      - 'develop'
+      - 'release/**'
 
 jobs:
-  deploy-dev:
-    if: startsWith(github.ref, 'refs/heads/features/')
-    uses: your-org/devops-pipelines/.github/workflows/build-and-deploy.yml@main
-    with:
-      environment: dev
-      app_name: my-app
-    secrets:
-      EC2_HOST: ${{ secrets.DEV_HOST }}
-      EC2_USER: ${{ secrets.EC2_USER }}
-      EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+  build-and-deploy:
+    runs-on: ubuntu-latest
 
-  deploy-test-stage:
-    if: github.ref == 'refs/heads/develop'
-    strategy:
-      matrix:
-        env: [test, stage]
-    uses: your-org/devops-pipelines/.github/workflows/build-and-deploy.yml@main
-    with:
-      environment: ${{ matrix.env }}
-      app_name: my-app
-    secrets:
-      EC2_HOST: ${{ secrets[format('{0}_HOST', matrix.env | upper)] }}
-      EC2_USER: ${{ secrets.EC2_USER }}
-      EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-  deploy-prod:
-    if: github.ref == 'refs/heads/release'
-    uses: your-org/devops-pipelines/.github/workflows/build-and-deploy.yml@main
-    with:
-      environment: prod
-      app_name: my-app
-    secrets:
-      EC2_HOST: ${{ secrets.PROD_HOST }}
-      EC2_USER: ${{ secrets.EC2_USER }}
-      EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build with Maven
+        run: mvn clean package -DskipTests
+
+      - name: Upload WAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: war-artifact
+          path: target/*.war
+
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Deploy to DEV
+        if: startsWith(github.ref, 'refs/heads/feature/')
+        run: |
+          echo "Deploying to DEV EC2..."
+          sshpass -p "${{ secrets.DEV_EC2_PASSWORD }}" \
+            scp -o StrictHostKeyChecking=no target/*.war \
+            ${{ secrets.DEV_EC2_USER }}@${{ secrets.DEV_EC2_HOST }}:/tmp/
+
+      - name: Deploy to TEST
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          echo "Deploying to TEST EC2..."
+          # sshpass -p "${{ secrets.TEST_EC2_PASSWORD }}" \
+          #   scp -o StrictHostKeyChecking=no target/*.war \
+          #   ${{ secrets.TEST_EC2_USER }}@${{ secrets.TEST_EC2_HOST }}:/tmp/
+
+      - name: Deploy to STAGE
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          echo "Deploying to STAGE EC2..."
+          # sshpass -p "${{ secrets.STAGE_EC2_PASSWORD }}" \
+          #   scp -o StrictHostKeyChecking=no target/*.war \
+          #   ${{ secrets.STAGE_EC2_USER }}@${{ secrets.STAGE_EC2_HOST }}:/tmp/
+
+      - name: Deploy to PROD
+        if: startsWith(github.ref, 'refs/heads/release/')
+        run: |
+          echo "Deploying to PROD EC2..."
+          # sshpass -p "${{ secrets.PROD_EC2_PASSWORD }}" \
+          #   scp -o StrictHostKeyChecking=no target/*.war \
+          #   ${{ secrets.PROD_EC2_USER }}@${{ secrets.PROD_EC2_HOST }}:/tmp/
+
+# name: Build and Deploy to EC2
+
+# on:
+#   push:
+#     branches:
+#       - main
+#       - develop
+#       - 'release/**'
+
+# jobs:
+#   build-and-deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout Code
+#         uses: actions/checkout@v4
+
+#       - name: Set up JDK 17
+#         uses: actions/setup-java@v4
+#         with:
+#           java-version: '17'
+#           distribution: 'temurin'
+
+#       - name: Build with Maven
+#         run: mvn clean package -DskipTests
+
+#       - name: Upload WAR artifact
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: war-artifact
+#           path: target/*.war
+
+#       - name: Install sshpass
+#         run: sudo apt-get update && sudo apt-get install -y sshpass
+
+#       - name: Deploy WAR to EC2
+#         run: |
+#           echo "Deploying to EC2..."
+#           ls -lh target/*.war
+#           sshpass -p "${{ secrets.EC2_PASSWORD }}" \
+#             scp -o StrictHostKeyChecking=no target/*.war \
+#             ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/tmp/
+
+# name: EC2 Deploy
+
+# on:
+#   push:
+#     branches:
+#       - 'features/**'
+#       - develop
+#       - release
+
+# jobs:
+#   deploy-dev:
+#     if: startsWith(github.ref, 'refs/heads/features/')
+#     uses: aruncena/devops-pipeline/.github/workflows/ec2.yaml@master
+#     with:
+#       environment: dev
+#       app_name: my-app
+#     secrets:
+#       EC2_HOST: ${{ secrets.DEV_HOST }}
+#       EC2_USER: ${{ secrets.EC2_USER }}
+#       EC2_PASSWORD: ${{ secrets.EC2_PASSWORD }}
+
+#   deploy-test-stage:
+#     if: github.ref == 'refs/heads/develop'
+#     strategy:
+#       matrix:
+#         env: [test, stage]
+#     uses: aruncena/devops-pipeline/.github/workflows/ec2.yaml@master
+#     with:
+#       environment: ${{ matrix.env }}
+#       app_name: my-app
+#     secrets:
+#       EC2_HOST: ${{ secrets[matrix.env == 'test' && 'TEST_HOST' || 'STAGE_HOST'] }}
+#       EC2_USER: ${{ secrets.EC2_USER }}
+#       EC2_PASSWORD: ${{ secrets.EC2_PASSWORD }}
+
+#   deploy-prod:
+#     if: github.ref == 'refs/heads/release'
+#     uses: aruncena/devops-pipeline/.github/workflows/ec2.yaml@master
+#     with:
+#       environment: prod
+#       app_name: my-app
+#     secrets:
+#       EC2_HOST: ${{ secrets.PROD_HOST }}
+#       EC2_USER: ${{ secrets.EC2_USER }}
+#       EC2_PASSWORD: ${{ secrets.EC2_PASSWORD }}
+
+
+# name: EC2 deploy
+
+# on:
+#   push:
+#     branches:
+#       - 'features/**'
+#       - develop
+#       - release
+
+# jobs:
+#   deploy-dev:
+#     if: startsWith(github.ref, 'refs/heads/features/')
+#     uses: aruncena/devops-pipeline/.github/workflows/ec2.yaml@master
+#     with:
+#       environment: dev
+#       app_name: my-app
+#     secrets:
+#       EC2_HOST: ${{ secrets.DEV_HOST }}
+#       EC2_USER: ${{ secrets.EC2_USER }}
+#       EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+
+#   deploy-test-stage:
+#     if: github.ref == 'refs/heads/develop'
+#     strategy:
+#       matrix:
+#         env: [test, stage]
+#     uses: aruncena/devops-pipeline/.github/workflows/ec2.yaml@master
+#     with:
+#       environment: ${{ matrix.env }}
+#       app_name: my-app
+#     secrets:
+#       EC2_HOST: ${{ secrets[matrix.env == 'test' && 'TEST_HOST' || 'STAGE_HOST'] }}
+#       EC2_USER: ${{ secrets.EC2_USER }}
+#       EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+
+#   deploy-prod:
+#     if: github.ref == 'refs/heads/release'
+#     uses: aruncena/devops-pipeline/.github/workflows/ec2.yaml@master
+#     with:
+#       environment: prod
+#       app_name: my-app
+#     secrets:
+#       EC2_HOST: ${{ secrets.PROD_HOST }}
+#       EC2_USER: ${{ secrets.EC2_USER }}
+#       EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
