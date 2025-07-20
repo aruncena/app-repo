@@ -37,6 +37,8 @@ jobs:
   deploy-dev:
     needs: build
     if: startsWith(github.ref, 'refs/heads/feature/')
+    environment:
+      name: dev
     runs-on: ubuntu-latest
     steps:
       - name: Download Artifact
@@ -117,8 +119,6 @@ jobs:
           # sshpass -p "${{ secrets.PROD_EC2_PASSWORD }}" \
           #   scp -o StrictHostKeyChecking=no *.war \
           #   ${{ secrets.PROD_EC2_USER }}@${{ secrets.PROD_EC2_HOST }}:/tmp/
-
-
 
 # name: Maven Build and Tomcat Deployment
 
