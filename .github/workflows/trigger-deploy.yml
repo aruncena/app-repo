@@ -37,6 +37,8 @@ jobs:
   deploy-dev:
     needs: build
     if: startsWith(github.ref, 'refs/heads/feature/')
+    environment:
+      name: dev
     runs-on: ubuntu-latest
     steps:
       - name: Download Artifact
