@@ -5,7 +5,7 @@ on:
     branches:
       - 'feature/**'
       - 'develop'
-      - 'release/**'
+      - 'release'
 
 jobs:
   build-and-deploy:
