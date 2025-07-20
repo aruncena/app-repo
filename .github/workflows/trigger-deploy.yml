@@ -1,4 +1,4 @@
-name: EC2 deploy
+name: EC2 Deploy
 
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
     secrets:
       EC2_HOST: ${{ secrets.DEV_HOST }}
       EC2_USER: ${{ secrets.EC2_USER }}
-      EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+      EC2_PASSWORD: ${{ secrets.EC2_PASSWORD }}
 
   deploy-test-stage:
     if: github.ref == 'refs/heads/develop'
@@ -31,7 +31,7 @@ jobs:
     secrets:
       EC2_HOST: ${{ secrets[matrix.env == 'test' && 'TEST_HOST' || 'STAGE_HOST'] }}
       EC2_USER: ${{ secrets.EC2_USER }}
-      EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+      EC2_PASSWORD: ${{ secrets.EC2_PASSWORD }}
 
   deploy-prod:
     if: github.ref == 'refs/heads/release'
@@ -42,4 +42,51 @@ jobs:
     secrets:
       EC2_HOST: ${{ secrets.PROD_HOST }}
       EC2_USER: ${{ secrets.EC2_USER }}
-      EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+      EC2_PASSWORD: ${{ secrets.EC2_PASSWORD }}
+
+
+# name: EC2 deploy
+
+# on:
+#   push:
+#     branches:
+#       - 'features/**'
+#       - develop
+#       - release
+
+# jobs:
+#   deploy-dev:
+#     if: startsWith(github.ref, 'refs/heads/features/')
+#     uses: aruncena/devops-pipeline/.github/workflows/ec2.yaml@master
+#     with:
+#       environment: dev
+#       app_name: my-app
+#     secrets:
+#       EC2_HOST: ${{ secrets.DEV_HOST }}
+#       EC2_USER: ${{ secrets.EC2_USER }}
+#       EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+
+#   deploy-test-stage:
+#     if: github.ref == 'refs/heads/develop'
+#     strategy:
+#       matrix:
+#         env: [test, stage]
+#     uses: aruncena/devops-pipeline/.github/workflows/ec2.yaml@master
+#     with:
+#       environment: ${{ matrix.env }}
+#       app_name: my-app
+#     secrets:
+#       EC2_HOST: ${{ secrets[matrix.env == 'test' && 'TEST_HOST' || 'STAGE_HOST'] }}
+#       EC2_USER: ${{ secrets.EC2_USER }}
+#       EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+
+#   deploy-prod:
+#     if: github.ref == 'refs/heads/release'
+#     uses: aruncena/devops-pipeline/.github/workflows/ec2.yaml@master
+#     with:
+#       environment: prod
+#       app_name: my-app
+#     secrets:
+#       EC2_HOST: ${{ secrets.PROD_HOST }}
+#       EC2_USER: ${{ secrets.EC2_USER }}
+#       EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
