@@ -58,7 +58,7 @@ jobs:
           #   ${{ secrets.STAGE_EC2_USER }}@${{ secrets.STAGE_EC2_HOST }}:/tmp/
 
       - name: Deploy to PROD
-        if: startsWith(github.ref, 'refs/heads/release/')
+        if: startsWith(github.ref, 'refs/heads/release')
         run: |
           echo "Deploying to PROD EC2..."
           # sshpass -p "${{ secrets.PROD_EC2_PASSWORD }}" \
