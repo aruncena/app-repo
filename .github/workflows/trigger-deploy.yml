@@ -121,7 +121,6 @@ jobs:
           #   ${{ secrets.PROD_EC2_USER }}@${{ secrets.PROD_EC2_HOST }}:/tmp/
 
 # name: Maven Build and Tomcat Deployment
-
 # on:
 #   push:
 #     branches:
