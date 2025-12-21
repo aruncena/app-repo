@@ -1,64 +1,50 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <groupId>io.happycoding</groupId>
   <artifactId>hello-world-maven</artifactId>
   <version>1</version>
   <packaging>war</packaging>
-
   <properties>
-    <!-- Java 11 -->
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-
   <dependencies>
-    <!-- Jakarta Servlets API -->
     <dependency>
       <groupId>jakarta.servlet</groupId>
       <artifactId>jakarta.servlet-api</artifactId>
       <version>5.0.0</version>
       <scope>provided</scope>
     </dependency>
-    <!-- JAX-RS API -->
     <dependency>
       <groupId>jakarta.ws.rs</groupId>
       <artifactId>jakarta.ws.rs-api</artifactId>
       <version>3.0.0</version>
     </dependency>
-    <!-- Jersey Server -->
     <dependency>
       <groupId>org.glassfish.jersey.core</groupId>
       <artifactId>jersey-server</artifactId>
       <version>3.0.8</version>
     </dependency>
-    <!-- Jersey Servlet Container -->
     <dependency>
       <groupId>org.glassfish.jersey.containers</groupId>
       <artifactId>jersey-container-servlet</artifactId>
       <version>3.0.8</version>
     </dependency>
-    <!-- Jersey HK2 for DI -->
     <dependency>
       <groupId>org.glassfish.jersey.inject</groupId>
       <artifactId>jersey-hk2</artifactId>
       <version>3.0.8</version>
     </dependency>
   </dependencies>
-
   <build>
+    <finalName>${project.artifactId}</finalName>
     <plugins>
-      <!-- Enable building as a .war file with `mvn package` -->
       <plugin>
         <artifactId>maven-war-plugin</artifactId>
         <version>3.3.1</version>
       </plugin>
     </plugins>
-
-    <!-- The output .war file's name, which will be the name of the webapp. -->
-    <finalName>${project.artifactId}</finalName>
   </build>
 </project>
