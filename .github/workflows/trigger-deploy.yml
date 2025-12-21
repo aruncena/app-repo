@@ -54,7 +54,7 @@ jobs:
           echo "Deploying to DEV EC2..."
           ls -lh *.war
           sshpass -p "${{ secrets.DEV_EC2_PASSWORD }}" \
-             scp -v -o StrictHostKeyChecking=no *.war \
+            sudo scp -v -o StrictHostKeyChecking=no *.war \
             ${{ secrets.DEV_EC2_USER }}@${{ secrets.DEV_EC2_HOST }}:/var/lib/tomcat10/webapps/
           echo "Deployed to DEV EC2 and restarted Tomcat Service"
   
