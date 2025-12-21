@@ -53,8 +53,9 @@ jobs:
         run: |
           echo "Deploying to DEV EC2..."
           sshpass -p "${{ secrets.DEV_EC2_PASSWORD }}" \
-            scp -o StrictHostKeyChecking=no *.war \
-            ${{ secrets.DEV_EC2_USER }}@${{ secrets.DEV_EC2_HOST }}:/var/lib/tomcat10/webapps
+            sudo scp -o StrictHostKeyChecking=no *.war \
+            ${{ secrets.DEV_EC2_USER }}@${{ secrets.DEV_EC2_HOST }}:/var/lib/tomcat10/webapps \
+            sudo systemctl restart tomcat10.service
 
   deploy-test:
     needs: build
