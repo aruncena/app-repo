@@ -15,5 +15,5 @@ You can compile this into a directory and a `.war` file by executing this comman
 ```
 mvn package
 ```
-
-Learn more at [HappyCoding.io/tutorials/java-server](https://happycoding.io/tutorials/java-server). Test commit
+Test commit
+Learn more at [HappyCoding.io/tutorials/java-server](https://happycoding.io/tutorials/java-server).
