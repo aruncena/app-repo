@@ -1,0 +1,66 @@
+name: Rollback Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to rollback (dev, test, stage, prod)'
+        required: true
+        type: choice
+        options:
+          - dev
+          - test
+          - stage
+          - prod
+      sha:
+        description: 'Commit SHA of the WAR to rollback to'
+        required: true
+        type: string
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Configure AWS CLI
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1  # Change to your region
+
+      - name: Download WAR from S3
+        run: |
+          aws s3 cp s3://coursecare.cloud1/${{ github.event.repository.name }}/${{ github.event.inputs.sha }}.war .
+
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Deploy to EC2
+        run: |
+          WAR_FILE=$(ls *.war)
+          echo "Rolling back to $WAR_FILE on ${{ github.event.inputs.environment }}"
+
+          if [ "${{ github.event.inputs.environment }}" == "dev" ]; then
+            HOST=${{ secrets.DEV_EC2_HOST }}
+            USER=${{ secrets.DEV_EC2_USER }}
+            PASS=${{ secrets.DEV_EC2_PASSWORD }}
+          elif [ "${{ github.event.inputs.environment }}" == "test" ]; then
+            HOST=${{ secrets.TEST_EC2_HOST }}
+            USER=${{ secrets.TEST_EC2_USER }}
+            PASS=${{ secrets.TEST_EC2_PASSWORD }}
+          elif [ "${{ github.event.inputs.environment }}" == "stage" ]; then
+            HOST=${{ secrets.STAGE_EC2_HOST }}
+            USER=${{ secrets.STAGE_EC2_USER }}
+            PASS=${{ secrets.STAGE_EC2_PASSWORD }}
+          elif [ "${{ github.event.inputs.environment }}" == "prod" ]; then
+            HOST=${{ secrets.PROD_EC2_HOST }}
+            USER=${{ secrets.PROD_EC2_USER }}
+            PASS=${{ secrets.PROD_EC2_PASSWORD }}
+          fi
+
+          sshpass -p "$PASS" ssh -o StrictHostKeyChecking=no $USER@$HOST "rm -rf /var/lib/tomcat10/webapps/*.war"
+          sshpass -p "$PASS" scp -v -o StrictHostKeyChecking=no $WAR_FILE $USER@$HOST:/var/lib/tomcat10/webapps/
+          sshpass -p "$PASS" ssh -o StrictHostKeyChecking=no $USER@$HOST "sudo systemctl restart tomcat10"
+          echo "Rollback deployed to ${{ github.event.inputs.environment }}"
