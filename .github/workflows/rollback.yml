@@ -61,6 +61,6 @@ jobs:
           fi
 
           sshpass -p "$PASS" ssh -o StrictHostKeyChecking=no $USER@$HOST "rm -rf /var/lib/tomcat10/webapps/*.war"
-          sshpass -p "$PASS" scp -v -o StrictHostKeyChecking=no $WAR_FILE $USER@$HOST:/var/lib/tomcat10/webapps/
+          sshpass -p "$PASS" scp  -o StrictHostKeyChecking=no $WAR_FILE $USER@$HOST:/var/lib/tomcat10/webapps/
           sshpass -p "$PASS" ssh -o StrictHostKeyChecking=no $USER@$HOST "sudo systemctl restart tomcat10"
           echo "Rollback deployed to ${{ github.event.inputs.environment }}"
