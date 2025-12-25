@@ -16,4 +16,4 @@ You can compile this into a directory and a `.war` file by executing this comman
 mvn package
 ```
 
-Learn more at [HappyCoding.io/tutorials/java-server](https://happycoding.io/tutorials/java-server).
+Learn more at [HappyCoding.io/tutorials/java-server](https://happycoding.io/tutorials/java-server). Test commit
