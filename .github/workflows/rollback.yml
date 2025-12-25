@@ -32,7 +32,7 @@ jobs:
 
       - name: Download WAR from S3
         run: |
-          aws s3 cp s3://coursecare.cloud1/${{ github.event.repository.name }}/${{ inputs.sha }}.war .
+          aws s3 cp s3://coursecare.cloud1/${{ github.event.repository.name }}/${{ github.event.inputs.sha }}.war .
 
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
